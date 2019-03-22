@@ -9,7 +9,7 @@
  * Released under the MIT license
  * https://jquery.org/license
  *
- * Date: 2018-01-20T17:24Z
+ * Date: 2019-03-22T08:18Z
  */
 ( function( global, factory ) {
 
@@ -4879,6 +4879,18 @@ function safeActiveElement() {
 	} catch ( err ) { }
 }
 
+// https://github.com/WICG/EventListenerOptions/blob/gh-pages/explainer.md#feature-detection
+var supportsPassive = false;
+try {
+	var opts = Object.defineProperty( {}, "passive", {
+		get: function() {
+			supportsPassive = true;
+		}
+	} );
+	window.addEventListener( "testPassive", null, opts );
+	window.removeEventListener( "testPassive", null, opts );
+} catch ( e ) {}
+
 function on( elem, types, selector, data, fn, one ) {
 	var origFn, type;
 
@@ -5036,7 +5048,8 @@ jQuery.event = {
 					special.setup.call( elem, data, namespaces, eventHandle ) === false ) {
 
 					if ( elem.addEventListener ) {
-						elem.addEventListener( type, eventHandle );
+						elem.addEventListener(
+							type, eventHandle, supportsPassive ? { passive: false } : false );
 					}
 				}
 			}
